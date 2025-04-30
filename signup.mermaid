@@ -1,0 +1,29 @@
+---
+title: User Sign Up Flow
+---
+sequenceDiagram
+    autonumber
+    actor  Browser
+    participant SUS as Sign Up Service
+    participant US as User Service
+    participant KA as Kakfa
+
+    Browser ->> SUS: Get /sign_up
+    activate SUS
+    SUS -->> Browser: 200 OK (HTML Page)
+    deactivate SUS
+
+    Browser ->>+ SUS: Post /sign_up
+    SUS ->> SUS: Validate Input
+
+    alt invalid input
+        SUS -->> Browser: Error
+    else valid input
+        SUS ->>+ US: Post /users
+        US --) KA : User Created Event Published
+        Note left of KA: other services take action based on this event
+        US -->>- SUS: 201 Created (User)
+        SUS -->>- Browser: 301 Redirect (Login page)
+    end
+
+    links US: {"Repository": "https://www.example.com/repository"}
